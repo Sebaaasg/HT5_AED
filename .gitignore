@@ -1,2 +1,11 @@
 *.pyc
 *.pyo
+*.pyd
+
+.vscode/
+.idea/
+*.swp
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
