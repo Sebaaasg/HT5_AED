@@ -26,23 +26,35 @@ class SimuladorSistema:
         memoria_requerida = random.randint(1, 10)
         instrucciones_restantes = random.randint(1, 10)
 
-        # Solicitar memoria
+        # NEW → solicita memoria
         yield self.RAM.get(memoria_requerida)
 
+        # READY → RUNNING
         while instrucciones_restantes > 0:
             
             with self.CPU.request() as request:
                 yield request
 
-                # Ejecuta por 1 unidad de tiempo
+                instrucciones_a_ejecutar = min(
+                    self.instrucciones_por_ciclo,
+                    instrucciones_restantes
+                )
+
                 yield self.env.timeout(1)
 
-                instrucciones_restantes -= self.instrucciones_por_ciclo
+                instrucciones_restantes -= instrucciones_a_ejecutar
 
-                if instrucciones_restantes < 0:
-                    instrucciones_restantes = 0
+            if instrucciones_restantes <= 0:
+                break
 
-        # Termina el proceso
+            # Probabilidad 1–21
+            evento = random.randint(1, 21)
+
+            # WAITING
+            if evento == 1:
+                yield self.env.timeout(1)
+
+        # TERMINATED → devuelve memoria
         yield self.RAM.put(memoria_requerida)
 
         tiempo_salida = self.env.now
